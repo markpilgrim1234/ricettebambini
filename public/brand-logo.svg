@@ -1,7 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
-  <title>Logo Buonissimo</title>
-  <circle cx="32" cy="32" r="30" fill="#f5c55b"/>
-  <path d="M19 18c0-3 2-5 5-5h10c9 0 15 4 15 11 0 4-2 7-6 9 5 1 8 5 8 10 0 8-6 13-17 13H24c-3 0-5-2-5-5V18Zm14 11c4 0 6-1 6-4s-2-4-6-4h-4v8h4Zm1 18c5 0 7-2 7-5s-2-5-7-5h-5v10h5Z" fill="#17382f"/>
-  <path d="M47 8c4 2 7 5 9 9" fill="none" stroke="#f28b70" stroke-width="5" stroke-linecap="round"/>
-  <path d="M8 43c2 5 5 9 10 12" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".75"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">Ricette bambini</title>
+  <desc id="desc">Ciotola con cucchiaio e foglie</desc>
+  <path d="M43.5 32.5 52 18" fill="none" stroke="#17382f" stroke-width="5" stroke-linecap="round"/>
+  <ellipse cx="54" cy="14.5" rx="4.5" ry="6" transform="rotate(30 54 14.5)" fill="#fff7df" stroke="#17382f" stroke-width="4"/>
+  <path d="M31 27C21 26 15 19 15 10c10 0 17 6 18 16Z" fill="#86b85c" stroke="#17382f" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M33 27c2-8 8-12 15-13-1 8-6 12-15 13Z" fill="#86b85c" stroke="#17382f" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M13 35c5-7 12-10 20-10 9 0 16 3 20 10Z" fill="#f5c55b"/>
+  <path d="M8 33h48c0 15-9 25-24 25S8 48 8 33Z" fill="#f28b70" stroke="#17382f" stroke-width="4.5" stroke-linejoin="round"/>
+  <path d="M8 33c7 4 41 4 48 0" fill="none" stroke="#17382f" stroke-width="4.5" stroke-linecap="round"/>
 </svg>
