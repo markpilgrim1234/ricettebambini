@@ -12,7 +12,7 @@ function normalizeWord(value:string){
 function normalizedWords(value:string){return value.split(/[^\p{L}\p{N}]+/u).map(normalizeWord).filter(Boolean)}
 function containsNormalized(haystack:string,needle:string){
  const available=normalizedWords(haystack);
- return normalizedWords(needle).every(term=>available.some(word=>word.includes(term)||term.includes(word)));
+ return normalizedWords(needle).every(term=>available.some(word=>word===term||(term.length>=3&&word.startsWith(term))));
 }
 function recipeType(recipe:Recipe){const h=`${recipe.source_url} ${recipe.title} ${recipe.ingredients.join(" ")}`.toLowerCase();if(/dolci-e-merende|biscott|torta|muffin|cupcake|gelato|dessert|ciambell|plumcake|cremini/.test(h))return"Dolci e merende";if(/ricette-di-pesce|salmone|merluzzo|trota|pesce|tonno|rana pescatrice|orata|nasello|sogliola/.test(h))return"Pesce";if(/ricette-di-carne|pollo|tacchino|manzo|vitello|maiale|prosciutto|carne|polpettone/.test(h))return"Carne";return"Vegetariane"}
 function nutritionBalance(recipe:Recipe){
