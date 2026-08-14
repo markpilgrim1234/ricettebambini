@@ -9,7 +9,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint .",
+    "lint": "eslint ."
   },
   "dependencies": {
     "drizzle-orm": "0.45.2",
