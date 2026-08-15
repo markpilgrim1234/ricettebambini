@@ -1,11 +1,14 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import recipesData from "./recipes.json";
+import { ingredientCatalog } from "./ingredient-catalog";
 
 type Recipe = { title:string; category:string; ingredients:string[]; procedure_excerpt:string; dose:string; image_url:string; source_url:string };
 const recipes = recipesData as Recipe[];
 function normalizeWord(value:string){
  const normalized=value.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]/g,"");
+ if(normalized==="pesca"||normalized==="pesche")return"pescafrutto";
+ if(normalized==="pesce"||normalized==="pesci")return"pesceanimale";
  if(normalized.length<4)return normalized;
  return normalized.replace(/(cchio|cchi)$/,"cch").replace(/(go|ghi)$/,"g").replace(/(ca|che)$/,"c").replace(/[aeiou]$/,"");
 }
@@ -18,6 +21,12 @@ function hasIngredient(haystack:string,needle:string){
  const available=normalizedWords(haystack);
  return normalizedWords(needle).every(term=>available.includes(term));
 }
+function hasCatalogIngredient(haystack:string,label:string){
+ const definition=ingredientCatalog.find(item=>item.label===label);
+ if(!definition)return hasIngredient(haystack,label);
+ if(label==="Pasta")return (hasIngredient(haystack,"pasta")&&!/(bris[eéè]|frolla|sfoglia)/i.test(haystack))||(definition.aliases??[]).some(alias=>hasIngredient(haystack,alias));
+ return [definition.label,...(definition.aliases??[])].some(alias=>hasIngredient(haystack,alias));
+}
 function recipeType(recipe:Recipe){return recipe.category}
 function nutritionBalance(recipe:Recipe){
  const protein=/pollo|tacchino|manzo|vitello|maiale|pesce|salmone|merluzzo|trota|tonno|uov|ricotta|yogurt|latte|formaggio|parmigiano|legum|lenticchi|ceci|fagiol|pisell|tofu/;
@@ -27,7 +36,7 @@ function nutritionBalance(recipe:Recipe){
  const total=scores.reduce((a,b)=>a+b,0);const rounded=scores.map(value=>Math.round(value/total*100));rounded[2]+=100-rounded.reduce((a,b)=>a+b,0);return{protein:rounded[0],carbs:rounded[1],vitamins:rounded[2]};
 }
 const types=["Vegetariane","Carne","Pesce","Dolci e merende"];
-const ingredientOptions=["Aglio","Arancia","Avocado","Banana","Basilico","Bietole","Broccoli","Brodo","Burro","Carne","Carote","Cavolfiore","Ceci","Cipolla","Farina","Fagioli","Fagiolini","Finocchi","Formaggio","Fragole","Latte","Lenticchie","Limone","Mais","Mela","Melanzane","Merluzzo","Nasello","Olio","Olive","Pane","Pangrattato","Panna","Parmigiano","Pasta","Patate","Pesce","Piselli","Pollo","Pomodori","Prezzemolo","Prosciutto","Ricotta","Riso","Robiola","Rosmarino","Salmone","Sedano","Spinaci","Tonno","Uova","Yogurt","Zucca","Zucchero","Zucchine"];
+const ingredientOptions=ingredientCatalog.map(item=>item.label);
 const balanceProfiles=["Tutti i bilanci","Bilanciata 50/25/25","Distribuzione uniforme","Più proteica","Più ricca di carboidrati","Più ricca di vitamine"];
 function matchesBalance(recipe:Recipe,profile:string){
  const b=nutritionBalance(recipe);if(profile==="Tutti i bilanci")return true;
@@ -41,10 +50,10 @@ function matchesBalance(recipe:Recipe,profile:string){
 export default function Home(){
  const[query,setQuery]=useState("");const[selectedIngredients,setSelectedIngredients]=useState<string[]>([]);const[draftIngredients,setDraftIngredients]=useState<string[]>([]);const[ingredientSearch,setIngredientSearch]=useState("");const[ingredientPickerOpen,setIngredientPickerOpen]=useState(false);const[type,setType]=useState("");const[maxIngredients,setMaxIngredients]=useState("Tutti");const[balanceProfile,setBalanceProfile]=useState("Tutti i bilanci");const[selected,setSelected]=useState<Recipe|null>(null);const[showBackTop,setShowBackTop]=useState(false);const[visibleCount,setVisibleCount]=useState(12);const[announcedCount,setAnnouncedCount]=useState(recipes.length);
  const ingredientTriggerRef=useRef<HTMLButtonElement>(null);const ingredientDialogRef=useRef<HTMLElement>(null);const ingredientCloseRef=useRef<HTMLButtonElement>(null);const randomTriggerRef=useRef<HTMLButtonElement>(null);const randomDialogRef=useRef<HTMLElement>(null);const randomCloseRef=useRef<HTMLButtonElement>(null);
- const filterRecipes=(ingredients:string[])=>recipes.filter(recipe=>{const text=`${recipe.title} ${recipe.category} ${recipe.procedure_excerpt}`;const ing=recipe.ingredients.join(" ");const q=!query.trim()||containsNormalized(text,query);const i=ingredients.every(item=>hasIngredient(ing,item));const t=!type||recipeType(recipe)===type;const c=maxIngredients==="Tutti"||recipe.ingredients.length<=Number(maxIngredients);return q&&i&&t&&c&&matchesBalance(recipe,balanceProfile)});
+ const filterRecipes=(ingredients:string[])=>recipes.filter(recipe=>{const text=`${recipe.title} ${recipe.category} ${recipe.procedure_excerpt}`;const ing=recipe.ingredients.join(" ");const q=!query.trim()||containsNormalized(text,query);const i=ingredients.every(item=>hasCatalogIngredient(ing,item));const t=!type||recipeType(recipe)===type;const c=maxIngredients==="Tutti"||recipe.ingredients.length<=Number(maxIngredients);return q&&i&&t&&c&&matchesBalance(recipe,balanceProfile)});
  const filtered=filterRecipes(selectedIngredients);
  const draftFiltered=filterRecipes(draftIngredients);
- const visibleIngredientOptions=ingredientOptions.filter(item=>!ingredientSearch.trim()||containsNormalized(item,ingredientSearch));
+ const visibleIngredientOptions=ingredientOptions.filter(label=>{if(!ingredientSearch.trim())return true;const definition=ingredientCatalog.find(item=>item.label===label);return containsNormalized([label,...(definition?.aliases??[])].join(" "),ingredientSearch)});
  const contextualIngredientCounts=Object.fromEntries(ingredientOptions.map(item=>[item,ingredientPickerOpen?filterRecipes(draftIngredients.includes(item)?draftIngredients:[...draftIngredients,item]).length:0]));
  const visibleRecipes=filtered.slice(0,visibleCount);
  const filtersActive=Boolean(query.trim()||selectedIngredients.length||type||maxIngredients!=="Tutti"||balanceProfile!=="Tutti i bilanci");
