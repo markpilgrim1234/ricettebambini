@@ -13,6 +13,12 @@ function normalizeWord(value:string){
  return normalized.replace(/(cchio|cchi)$/,"cch").replace(/(go|ghi)$/,"g").replace(/(ca|che)$/,"c").replace(/[aeiou]$/,"");
 }
 function normalizedWords(value:string){return value.split(/[^\p{L}\p{N}]+/u).map(normalizeWord).filter(Boolean)}
+function catalogSearchWords(value:string){return value.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().split(/[^a-z0-9]+/).filter(Boolean)}
+function matchesCatalogSearch(value:string,search:string){
+ const ignored=new Set(["a","al","alla","alle","con","d","da","dal","dalla","de","dei","del","della","delle","di","e","in","per"]);
+ const available=catalogSearchWords(value).filter(word=>!ignored.has(word));
+ return catalogSearchWords(search).every(term=>available.some(word=>word.startsWith(term)));
+}
 function containsNormalized(haystack:string,needle:string){
  const available=normalizedWords(haystack);
  return normalizedWords(needle).every(term=>available.some(word=>word===term||(term.length>=3&&word.startsWith(term))));
@@ -53,8 +59,8 @@ export default function Home(){
  const filterRecipes=(ingredients:string[])=>recipes.filter(recipe=>{const text=`${recipe.title} ${recipe.category} ${recipe.procedure_excerpt}`;const ing=recipe.ingredients.join(" ");const q=!query.trim()||containsNormalized(text,query);const i=ingredients.every(item=>hasCatalogIngredient(ing,item));const t=!type||recipeType(recipe)===type;const c=maxIngredients==="Tutti"||recipe.ingredients.length<=Number(maxIngredients);return q&&i&&t&&c&&matchesBalance(recipe,balanceProfile)});
  const filtered=filterRecipes(selectedIngredients);
  const draftFiltered=filterRecipes(draftIngredients);
- const visibleIngredientOptions=ingredientOptions.filter(label=>{if(!ingredientSearch.trim())return true;const definition=ingredientCatalog.find(item=>item.label===label);return containsNormalized([label,...(definition?.aliases??[])].join(" "),ingredientSearch)});
  const contextualIngredientCounts=Object.fromEntries(ingredientOptions.map(item=>[item,ingredientPickerOpen?filterRecipes(draftIngredients.includes(item)?draftIngredients:[...draftIngredients,item]).length:0]));
+ const visibleIngredientOptions=ingredientOptions.filter(label=>{if(!ingredientSearch.trim())return true;const definition=ingredientCatalog.find(item=>item.label===label);return matchesCatalogSearch([label,...(definition?.aliases??[])].join(" "),ingredientSearch)}).sort((a,b)=>contextualIngredientCounts[b]-contextualIngredientCounts[a]||a.localeCompare(b,"it"));
  const visibleRecipes=filtered.slice(0,visibleCount);
  const filtersActive=Boolean(query.trim()||selectedIngredients.length||type||maxIngredients!=="Tutti"||balanceProfile!=="Tutti i bilanci");
  const randomRecipe=()=>{const pool=filtered.length?filtered:recipes;setSelected(pool[Math.floor(Math.random()*pool.length)])};
