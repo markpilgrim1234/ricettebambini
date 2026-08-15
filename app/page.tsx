@@ -42,7 +42,12 @@ function nutritionBalance(recipe:Recipe){
  const total=scores.reduce((a,b)=>a+b,0);const rounded=scores.map(value=>Math.round(value/total*100));rounded[2]+=100-rounded.reduce((a,b)=>a+b,0);return{protein:rounded[0],carbs:rounded[1],vitamins:rounded[2]};
 }
 const types=["Vegetariane","Carne","Pesce","Dolci e merende"];
-const ingredientOptions=ingredientCatalog.map(item=>item.label);
+const hiddenIngredientOptions=new Set([
+ "Acqua","Ghiaccio","Olio d’oliva","Olio di semi","Sale","Pepe","Aglio","Alloro","Aneto","Basilico","Cannella","Erbe aromatiche","Maggiorana","Menta","Noce moscata","Origano","Prezzemolo","Rosmarino","Salvia","Timo","Vaniglia","Zafferano","Zenzero",
+ "Agar agar","Amido di mais","Bicarbonato","Brodo","Fecola","Gelatina","Lievito","Malto","Semi di papavero","Semi di sesamo",
+ "Burro","Capperi","Mollica","Panna","Zucchero","Zuccherini"
+]);
+const ingredientOptions=ingredientCatalog.map(item=>item.label).filter(label=>!hiddenIngredientOptions.has(label));
 const balanceProfiles=["Tutti i bilanci","Bilanciata 50/25/25","Distribuzione uniforme","Più proteica","Più ricca di carboidrati","Più ricca di vitamine"];
 function matchesBalance(recipe:Recipe,profile:string){
  const b=nutritionBalance(recipe);if(profile==="Tutti i bilanci")return true;

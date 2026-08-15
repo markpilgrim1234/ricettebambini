@@ -184,7 +184,6 @@ export const ingredientCatalog: IngredientDefinition[] = [
   { label: "Vaniglia", aliases: ["vanillina", "vanigliato"] },
   { label: "Verdure" },
   { label: "Verza" },
-  { label: "Vino bianco", aliases: ["vino"] },
   { label: "Vitello" },
   { label: "Yogurt", aliases: ["yogurt greco"] },
   { label: "Zafferano" },
