@@ -71,7 +71,7 @@ export default function Home(){
  const filtered=useMemo(()=>filterRecipes(selectedIngredients),[filterRecipes,selectedIngredients]);
  const draftFiltered=useMemo(()=>filterRecipes(draftIngredients),[filterRecipes,draftIngredients]);
  const availableIngredients=useMemo(()=>{const available=new Set<string>();if(!ingredientPickerOpen)return available;draftFiltered.forEach(recipe=>recipeIngredientIndex.get(recipe)?.forEach(item=>available.add(item)));return available},[draftFiltered,ingredientPickerOpen]);
- const visibleIngredientOptions=useMemo(()=>ingredientOptions.filter(label=>{if(!ingredientSearch.trim())return true;const definition=ingredientCatalogByLabel.get(label);return matchesCatalogSearch([label,...(definition?.aliases??[])].join(" "),ingredientSearch)}).sort((a,b)=>a.localeCompare(b,"it")),[ingredientSearch]);
+ const visibleIngredientOptions=useMemo(()=>ingredientOptions.filter(label=>{if(!ingredientSearch.trim())return true;const definition=ingredientCatalogByLabel.get(label);return matchesCatalogSearch([label,...(definition?.aliases??[])].join(" "),ingredientSearch)}).sort((a,b)=>{const rank=(label:string)=>draftIngredients.includes(label)?0:availableIngredients.has(label)?1:2;return rank(a)-rank(b)||a.localeCompare(b,"it")}),[ingredientSearch,draftIngredients,availableIngredients]);
  const visibleRecipes=filtered.slice(0,visibleCount);
  const filtersActive=Boolean(query.trim()||selectedIngredients.length||type||maxIngredients!=="Tutti"||balanceProfile!=="Tutti i bilanci");
  const randomRecipe=()=>{const pool=filtered.length?filtered:recipes;setSelected(pool[Math.floor(Math.random()*pool.length)])};
